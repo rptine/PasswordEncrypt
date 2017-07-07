@@ -2,8 +2,20 @@ from EntryClass import *
 import random
 import math
 
-def stringToNum(message):
-    pass
+def stringToBitList(message):
+    bitList = []
+    for character in message:
+        b = bin(ord(character))[2:] # don't include the first two characters because they will contain 0b, not the actual value
+        b = '00000000'[len(b)]+b
+        for bit in b:
+            bitList.append(bit)
+    return bitList 
+
+def bitListToInt(bitList):
+    return int(''.join([('0','1')[int(e)] for e in bitList]),2)
+
+def stringToInt(message):
+    return bitListToInt(stringToBitList(message))
 
 def NumToString(message):
     pass
@@ -16,7 +28,7 @@ def generateLargePrime():
 
 def encrypt(message,n,totient,e,printKeys):
     d = modularInverse(e,totient) # the inverse of k mod totient is our private key
-    numMsg = stringToNum
+    numMsg = stringToInt(message)
     encryptedMsg = pow(int(numMsg),e,n)
     if printKeys:
         f = open("publicKey.txt",'w+')
@@ -50,11 +62,10 @@ if __name__ == '__main__':
         q = generateLargePrime()
         n = p*q
         totient = (p-1)*(q-1)
-    #    e = generateSmallPrime(min(totient,9223372036854775807))
     printKeys = False
     encryptedOutput =''
     decryptedOutput = ''
-    if R1 ==='encrypt':
+    if R2 in {"Encrypt","encrypt"}:
         builder = ""
         placer = 0
         for a in str(R2):
@@ -81,7 +92,7 @@ if __name__ == '__main__':
         f.write(encryptedOutput)
         f.close()
 
-    elif R1 == 'decrypt':
+    elif R1 in {"Decrypt","decrypt"}:
         publicText = raw_input("Enter the name of a the text file containing the public key: ")
         with open(publicText,'r') as f:
             publicKey = f.read()
