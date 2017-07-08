@@ -46,8 +46,17 @@ def intToString(integer):
     bitSeq = binstringToBitList(binary)
     return bitsToString(padBits(bitSeq,(len(bitSeq)+(8-(len(bitSeq)%8)))))
 
+def extendedGCD(a, b):
+    """return gcd,x and y such that a*x+b*y = gcd(x,y)"""
+    if a== 0:
+        return (b,0,1)
+    else:
+        gcd, x, y = extendedGCD(a%b,a)
+        return (gcd, y-(b/a), x)
+
 def modularInverse(a,mod):
-    pass
+    gcd,x,y = extendedGCD(a,mod)
+    return x%mod
 
 def generateLargePrime():
     pass
