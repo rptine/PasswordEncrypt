@@ -60,8 +60,25 @@ def modularInverse(a,mod):
         raise ValueError
     return x%mod
 
+def isPrime(num):
+    sPrime = True # True if the number is still possibly prime
+    if (num<2):
+        return False
+    elif num ==2:
+        return True
+    elif num%2==0:
+        return False
+    for it in xrange(3,int(num**.5),2):
+        if num%it==0:
+            return False
+    return True
+
 def generateLargePrime():
-    pass
+    # Return a random prime number of keysize bits in size.
+    while True:
+        num = random.randrange(2**(1023), 2**(1024))
+        if isPrime(num):
+            return num
 
 def encrypt(message,n,totient,e,printKeys):
     d = modularInverse(e,totient) # the inverse of k mod totient is our private key
