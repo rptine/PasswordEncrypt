@@ -48,7 +48,7 @@ def intToString(integer):
 
 def extendedGCD(a, b):
     """return gcd,x and y so that a*x+b*y = gcd(x,y)"""
-    if a== 0:
+    if a == 0:
         return (b,0,1)
     else:
         gcd, x, y = extendedGCD(b%a,a)
@@ -61,16 +61,29 @@ def modularInverse(a,mod):
     return x%mod
 
 def isPrime(num):
-    sPrime = True # True if the number is still possibly prime
+    smallPrimes = []
+    # Three basic cases where number can be quickly seen as prime or not prime
     if (num<2):
         return False
     elif num ==2:
         return True
     elif num%2==0:
         return False
-    for it in xrange(3,int(num**.5),2):
-        if num%it==0:
-            return False
+
+    # Start of Rabin Miller Primality Test
+    r = num - 1
+    counter = 0
+    # if r is even keep halving it
+    while r%2 == 0:
+        r = r/2
+        counter += 1
+    for trial in range(10):
+        a = random.randrange(2,num)
+        if pow(a,s,num) == 1:
+            return True # find a^s mod num
+    for i in range (r):
+        if pow(a,(2**j)*counter,num) == -1 % num:
+            return True
     return True
 
 def generateLargePrime():
