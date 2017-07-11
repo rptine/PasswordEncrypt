@@ -62,29 +62,34 @@ def modularInverse(a,mod):
 
 def isPrime(num):
     smallPrimes = []
-    # Three basic cases where number can be quickly seen as prime or not prime
+    # Two basic cases where number can be quickly seen as prime or not prime
     if (num<2):
         return False
-    elif num ==2:
-        return True
     elif num%2==0:
-        return False
+        return num == 2 # Two is the only even prime number
 
     # Start of Rabin Miller Primality Test
-    r = num - 1
-    counter = 0
+    s = num - 1
+    counter1 = 0
     # if r is even keep halving it
-    while r%2 == 0:
-        r = r/2
-        counter += 1
-    for trial in range(10):
-        a = random.randrange(2,num)
-        if pow(a,s,num) == 1:
-            return True # find a^s mod num
-    for i in range (r):
-        if pow(a,(2**j)*counter,num) == -1 % num:
-            return True
-    return True
+    while s%2 == 0:
+        s = s/2
+        counter1 += 1 # increment counter1
+    trial = 8 # Number of times we will check num's primailty. Accuracy is improved with increased trials
+    while trial>0:
+        rando = random.randrange(2,num)
+        modNum = pow(rando,s,num) # modNum is equal to rando^r mod num
+        if modNum != 1: # Rabin miller test does not apply if v = 1
+            counter2 = 0
+            while modNum != (num - 1):
+                if counter2 == counter1-1:
+                    return False
+                else:
+                    counter2 += 1 # increment counter2
+                    modNum = (modNum**2)%num # update v
+        trial -= 1
+    return True # if none of these conditions have been met, num is likely true
+
 
 def generateLargePrime():
     # Return a random prime number of keysize bits in size.
