@@ -3,16 +3,35 @@ import random
 import math
 
 def stringToBitList(message):
-    bitList = []
+    """bitList = []
     for character in message:
         b = bin(ord(character))[2:] # don't include the first two characters because they will contain 0b, not the actual value
         b = '00000000'[len(b)]+b
         for bit in b:
-            bitList.append(bit)
-    return bitList 
+            bitList.append(int(bit))
+    return bitList """
+    total = []
+    for character in message:
+        c = ord(character)
+        indiv = []
+        #if c == 0:
+        #    return [0]
+        while c > 0:
+            indiv = [(c % 2)] + indiv
+            c = c / 2
+        indiv = padBits(indiv,8)
+        total = total + indiv
+    return total
+
+
+    def charToBit(c):
+        return padBits(convertToBits(ord(c)), ASCII_BITS)
+    return [b for group in
+            map(charToBit, message)
+            for b in group]
 
 def bitListToInt(bitList):
-    return int(''.join([('0','1')[int(e)] for e in bitList]),2)
+    return int(''.join([('0','1')[e] for e in bitList]),2)
 
 def stringToInt(message):
     """Wrapper function for above two funtions to convert a string to a base 10 integer based on the ASCII values of its characters"""
@@ -55,7 +74,7 @@ def extendedGCD(a, b):
         return (gcd, y-(b/a)*x, x)
 
 def modularInverse(a,mod):
-    gcd,x,y = extendedGCD(b,mod)
+    gcd,x,y = extendedGCD(a,mod)
     if gcd != 1:
         raise ValueError
     return x%mod
@@ -134,10 +153,11 @@ if __name__ == '__main__':
         q = generateLargePrime()
         n = p*q
         totient = (p-1)*(q-1)
+    #    e = generateSmallPrime(min(totient,9223372036854775807))
     printKeys = False
     encryptedOutput =''
     decryptedOutput = ''
-    if R2 in {"Encrypt","encrypt"}:
+    if R1 in {"Encrypt","encrypt"}:
         builder = ""
         placer = 0
         for a in str(R2):
@@ -163,6 +183,7 @@ if __name__ == '__main__':
         f = open("encryptedList.txt",'w+')
         f.write(encryptedOutput)
         f.close()
+        print "Please find a file named encryptedList.txt containing your list of encrypted usernames/passwords, a file named publicKey.txt containing your public key which may stored anywhere, and a file named privateKey.txt which must be stored safely"
 
     elif R1 in {"Decrypt","decrypt"}:
         publicText = raw_input("Enter the name of a the text file containing the public key: ")
@@ -191,9 +212,10 @@ if __name__ == '__main__':
                 placer = placer + 1
         for i in range (len(entryList)):
             decryptedOutput = decryptedOutput + str(entryList[i].appName) + ',' + str(decrypt(str(entryList[i].username),int(publicKey),int(privateKey))) + ',' + str(decrypt(str(entryList[i].password),int(publicKey),int(privateKey))) + ';'
-            f5 =open("decryptedList.txt",'w+')
-            f5.write(decryptedOutput)
-            f5.close()
+        f5 =open("decryptedList.txt",'w+')
+        f5.write(decryptedOutput)
+        f5.close()
+        print "Please find a file named decryptedList.txt containing your list of decrypted usernames/passwords"
 
 
 
