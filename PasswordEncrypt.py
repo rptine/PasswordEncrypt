@@ -3,32 +3,16 @@ import random
 import math
 
 def stringToBitList(message):
-    """bitList = []
-    for character in message:
-        b = bin(ord(character))[2:] # don't include the first two characters because they will contain 0b, not the actual value
-        b = '00000000'[len(b)]+b
-        for bit in b:
-            bitList.append(int(bit))
-    return bitList """
     total = []
     for character in message:
         c = ord(character)
         indiv = []
-        #if c == 0:
-        #    return [0]
         while c > 0:
             indiv = [(c % 2)] + indiv
             c = c / 2
         indiv = padBits(indiv,8)
         total = total + indiv
     return total
-
-
-    def charToBit(c):
-        return padBits(convertToBits(ord(c)), ASCII_BITS)
-    return [b for group in
-            map(charToBit, message)
-            for b in group]
 
 def bitListToInt(bitList):
     return int(''.join([('0','1')[e] for e in bitList]),2)
@@ -74,13 +58,14 @@ def extendedGCD(a, b):
         return (gcd, y-(b/a)*x, x)
 
 def modularInverse(a,mod):
+    """Return the value whose product with a mod mod is 1"""
     gcd,x,y = extendedGCD(a,mod)
     if gcd != 1:
         raise ValueError
     return x%mod
 
 def isPrime(num):
-    smallPrimes = []
+    """"Returns True if the number is prime, and False otherwise."""
     # Two basic cases where number can be quickly seen as prime or not prime
     if (num<2):
         return False
@@ -111,16 +96,16 @@ def isPrime(num):
 
 
 def generateLargePrime():
-    # Return a random prime number of keysize bits in size.
+    """""Returns a prime number in the range from 2^1023 and (2^1024)-1"""
     while True:
-        num = random.randrange(2**(1023), 2**(1024))
+        num = random.randrange(2**(1023), 2**(1024)-1)
         if isPrime(num):
             return num
 
 def encrypt(message,n,totient,e,printKeys):
     d = modularInverse(e,totient) # the inverse of k mod totient is our private key
     numMsg = stringToInt(message)
-    encryptedMsg = pow(int(numMsg),e,n)
+    encryptedMsg = pow(int(numMsg),e,n) #message^e mod n is our encrypted message
     if printKeys:
         f = open("publicKey.txt",'w+')
         f.write(str(n))
@@ -139,7 +124,8 @@ if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a list of passwords? ")
     while (R1 not in {"Encrypt","encrypt","Decrypt","decrypt"}):
         R1 = raw_input("Please enter one of the key words 'encrypt' or 'decrypt': ")
-    R2Text = raw_input("Enter the name of the text file containing your list of passwords (in the format Website/App Name,username,Password;) ")
+    R2Text = raw_input("Enter the name of the text file containing your list of passwords \
+    (in the format Website/App Name,username,Password;) ")
     with open(R2Text,'r') as f1:
             R2 = f1.read()
     entryList = []
@@ -148,38 +134,38 @@ if __name__ == '__main__':
     n = p*q
     totient = (p-1)*(q-1)
     e = 65537 # Can use 65537 as our default value for k (our public key), unless k is a factor of the totient
-    while ((e%totient)==0): 
+    while ((e%totient)==0): # in the rare case when 65537 is not a unit of the totient, pick two new random numbers and calculate a new totient
         p = generateLargePrime()
         q = generateLargePrime()
         n = p*q
         totient = (p-1)*(q-1)
-    #    e = generateSmallPrime(min(totient,9223372036854775807))
     printKeys = False
     encryptedOutput =''
     decryptedOutput = ''
     if R1 in {"Encrypt","encrypt"}:
         builder = ""
         placer = 0
-        for a in str(R2):
-            if (a not in{",",";"}):
-                builder = builder + str(a)
+        for a in R2:
+            if placer%3 == 0:
+                newTitle = a
+                #builder = ''
+            elif placer%3 == 1:
+                newUser = a
+                #builder = ''
             else:
-                if placer%3 == 0:
-                    newTitle = builder
-                    builder = ''
-                elif placer%3 == 1:
-                    newUser = builder
-                    builder = ''
-                else:
-                    newPass = builder
-                    builder = ''
-                    newEntry = Entry(newTitle,newUser,newPass)
-                    entryList.append(newEntry)
-                placer = placer + 1
+                newPass = a
+                #builder = ''
+                newEntry = Entry(newTitle,newUser,newPass)
+                entryList.append(newEntry)
+                print newEntry.appName, newEntry.username, newEntry.password
+                print a
+            placer = placer + 1
         for i in range (len(entryList)):
             if (i == len(entryList)-1):
                 printKeys = True
-            encryptedOutput = encryptedOutput + str(entryList[i].appName) + ',' + str(encrypt(str(entryList[i].username),n,totient,e,False)) + ',' + str(encrypt(str(entryList[i].password),n,totient,e,printKeys)) + ';'
+            encryptedOutput = encryptedOutput + str(entryList[i].appName) + ',' + \
+            str(encrypt(str(entryList[i].username),n,totient,e,False)) + ',' + \
+            str(encrypt(str(entryList[i].password),n,totient,e,printKeys)) + ';'
         f = open("encryptedList.txt",'w+')
         f.write(encryptedOutput)
         f.close()
@@ -195,7 +181,7 @@ if __name__ == '__main__':
         builder = ""
         placer = 0
         for a in str(R2):
-            if (a not in {",",";"}):
+            if a != " ":
                 builder = builder + str(a)
             else:
                 if placer%3 == 0:
@@ -211,7 +197,9 @@ if __name__ == '__main__':
                     entryList.append(newEntry)
                 placer = placer + 1
         for i in range (len(entryList)):
-            decryptedOutput = decryptedOutput + str(entryList[i].appName) + ',' + str(decrypt(str(entryList[i].username),int(publicKey),int(privateKey))) + ',' + str(decrypt(str(entryList[i].password),int(publicKey),int(privateKey))) + ';'
+            decryptedOutput = decryptedOutput + str(entryList[i].appName) + ',' + \
+            str(decrypt(str(entryList[i].username),int(publicKey),int(privateKey))) + \
+            ',' + str(decrypt(str(entryList[i].password),int(publicKey),int(privateKey))) + ';'
         f5 =open("decryptedList.txt",'w+')
         f5.write(decryptedOutput)
         f5.close()
