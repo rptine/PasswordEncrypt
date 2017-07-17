@@ -1,8 +1,8 @@
-from EntryClass import *
 import random
 import math
 
 def stringToBitList(message):
+    """Converts a string with alphabetic, numeric and special characters to a list ([]) of 0's and 1's"""
     total = []
     for character in message:
         c = ord(character)
@@ -135,8 +135,8 @@ if __name__ == '__main__':
     with open(R2Text,'r') as f1:
         R2 = f1.read()
         lines = R2.split("\n")
+        lines = filter(None, lines) # remove all empty strings that represent blank lines
         print lines
-    entryList = []
     p = generateLargePrime()
     q = generateLargePrime()
     n = p*q
@@ -150,35 +150,22 @@ if __name__ == '__main__':
         n = p*q
         totient = (p-1)*(q-1)
     printKeys = False
-    encryptedOutput =''
-    decryptedOutput = ''
     if R1 in {"Encrypt","encrypt"}:
-        builder = ""
         placer = 0
-        for a in lines:
-            if placer%3 == 0:
-                newTitle = a
-                #builder = ''
-            elif placer%3 == 1:
-                newUser = a
-                #builder = ''
-            else:
-                newPass = a
-                #builder = ''
-                newEntry = Entry(newTitle,newUser,newPass)
-                entryList.append(newEntry)
-                print newEntry.appName, newEntry.username, newEntry.password
-            placer = placer + 1
         f = open("encryptedList.txt","a")
-        for i in range (len(entryList)):
-            if (i == len(entryList)-1):
-                printKeys = True   
-            f.write(str(entryList[i].appName))
-            f.write('\n')
-            f.write(str(encrypt(str(entryList[i].username),n,totient,e,False)))
-            f.write('\n')
-            f.write(str(encrypt(str(entryList[i].password),n,totient,e,printKeys)))
-            f.write('\n')
+        for i in range (len(lines)):
+            if placer%3 == 0:
+                f.write(str(lines[i]))
+                f.write('\n')
+            elif placer%3 == 1:
+                f.write(str(encrypt(str(lines[i]),n,totient,e,False)))
+                f.write('\n')
+            else:
+                if (i == len(lines)-1):
+                    printKeys = True 
+                f.write(str(encrypt(str(lines[i]),n,totient,e,printKeys)))
+                f.write('\n')
+            placer = placer + 1
         print ("Please find a file named encryptedList.txt containing your list of encrypted "
             "usernames/passwords, a file named publicKey.txt containing your public key which may "
             "stored anywhere, and a file named privateKey.txt which must be stored safely")
@@ -191,21 +178,19 @@ if __name__ == '__main__':
         with open(privateText,'r') as f2:
             privateKey = f2.read()
         placer = 0
-        for a in lines:
+        f = open("decryptedList.txt","a")
+        for i in range(len(lines)):
             if placer%3 == 0:
-                newTitle = a
+                f.write(str(lines[i]))
+                f.write('\n')
             elif placer%3 == 1:
-                newUser = a
+                f.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                f.write('\n')
             else:
-                newPass = a
-                newEntry = Entry(newTitle,newUser,newPass)
-                entryList.append(newEntry)
-                placer = placer + 1
-        f = open("decryptedList.txt",'a')
-        for i in range (len(entryList)):
-            f.write(str(entryList[i].appName))
-            f.write(str(decrypt(str(entryList[i].username),int(publicKey),int(privateKey))))
-            f.write(str(decrypt(str(entryList[i].password),int(publicKey),int(privateKey))))
+                f.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                f.write('\n')
+                f.write('\n')
+            placer = placer + 1
         print "Please find a file named decryptedList.txt containing your list of decrypted usernames/passwords"
 
 
