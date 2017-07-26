@@ -2,20 +2,25 @@ import random
 import math
 
 def stringToBitList(message):
-    """Converts a string with alphabetic, numeric and special characters to a list ([]) of 0's and 1's"""
+    """Convert a string with alphabetic, numeric and special characters to a list of 0's and 1's"""
     total = []
     for character in message:
-        c = ord(character)
+        # Store Unicode code point of the character in c
+        c = ord(character) 
         indiv = []
+        # Convert the value in c to binary, and store this binary as a list of 0's and 1's
         while c > 0:
             indiv = [(c % 2)] + indiv
             c = c / 2
+        # Pad the binary representation to 8 bits
         indiv = padBits(indiv,8)
+        # Sum the padded binary representations of each character 
         total = total + indiv
     return total
 
 def bitListToInt(bitList):
-    return int(''.join([('0','1')[e] for e in bitList]),2)
+    """Convert a list of 0's and 1's, to an int of base 10"""
+    return int(''.join([('0','1')[b] for b in bitList]),2)
 
 def stringToInt(message):
     """Wrapper function for above two funtions to convert a 
@@ -24,24 +29,28 @@ def stringToInt(message):
     return bitListToInt(stringToBitList(message))
 
 def binstringToBitList(binstring): 
+    """Convert a string of '0's and '1's to a list of 0's and 1's"""
     bitList = []
     for bit in binstring:
         bitList.append(int(bit))
     return bitList
 
 def padBits(bits, padding):
+    """Pad the input bits with 0's so that it is of length padding"""
     return [0] * (padding-len(bits)) + bits
 
-def bitsToString(paddedBitSeq):
+def bitListToString(paddedBitSeq):
+    """Convert a list of 0's and 1's to a string of alpha/numeric characters"""
     charBuilder = ''
-    for segment in range(0,len(paddedBitSeq),8): # count by 8's because each padded bit
-                                                 # sequence is 8 bits long
-        charBuilder = charBuilder + bitsToChar(paddedBitSeq[segment: segment+8]) # concatenate each new char onto the built up string
+    # Iterate through by 8's becaause each padded bit sequence is 8 bits long
+    for segment in range(0,len(paddedBitSeq),8): 
+        # concatenate each new char onto the built up string
+        charBuilder = charBuilder + bitsToChar(paddedBitSeq[segment: segment+8]) 
     return charBuilder
 
 def bitsToChar(bitSeq):
     """Convert each 8 bit length padded bit sequences 
-    back to a char based on its ASCII value"""
+    back to a char based on its unicode value"""
     value = 0
     for bit in bitSeq:
         value = (value * 2) + bit # This for loop will determine the numeric value of the binary bit sequence input
@@ -53,25 +62,25 @@ def intToString(integer):
     its characters"""
     binary = bin(integer)[2:]
     bitSeq = binstringToBitList(binary)
-    return bitsToString(padBits(bitSeq,(len(bitSeq)+(8-(len(bitSeq)%8)))))
+    return bitListToString(padBits(bitSeq,(len(bitSeq)+(8-(len(bitSeq)%8)))))
 
 def extendedGCD(a, b):
-    """return gcd,x and y so that a*x+b*y = gcd(x,y)"""
+    """Return gcd, x and y so that a*x+b*y = gcd(x,y)"""
+    # Base case (when a = 0)
     if a == 0:
         return (b,0,1)
+    # Recursive case
     else:
         gcd, x, y = extendedGCD(b%a,a)
         return (gcd, y-(b/a)*x, x)
 
 def modularInverse(a,mod):
-    """Return the value whose product with a mod mod is 1"""
+    """Return the value whose product with (a % mod) is equal to 1"""
     gcd,x,y = extendedGCD(a,mod)
-    if gcd != 1:
-        raise ValueError
     return x%mod
 
 def isPrime(num):
-    """"Returns True if the number is prime, and False otherwise."""
+    """"Return True if the number is prime, and False otherwise."""
     # Two basic cases where number can be quickly seen as prime or not prime
     if (num<2):
         return False
@@ -81,10 +90,11 @@ def isPrime(num):
     # Start of Rabin Miller Primality Test
     s = num - 1
     counter1 = 0
-    # if r is even keep halving it
+    # if s is even keep halving it
     while s%2 == 0:
         s = s/2
-        counter1 += 1 # increment counter1
+        # increment counter1
+        counter1 += 1 
     trial = 8 # Number of times we will check num's primailty. Accuracy is improved with increased trials
     while trial>0:
         rando = random.randrange(2,num)
@@ -92,105 +102,139 @@ def isPrime(num):
         if modNum != 1: # Rabin miller test does not apply if v = 1
             counter2 = 0
             while modNum != (num - 1):
+                # case that would mean that num is not prime
                 if counter2 == counter1-1:
                     return False
                 else:
-                    counter2 += 1 # increment counter2
-                    modNum = (modNum**2)%num # update v
+                    # increment counter2 
+                    counter2 += 1
+                    # update v
+                    modNum = (modNum**2)%num 
         trial -= 1
-    return True # if none of these conditions have been met, num is likely true
+    # if none of these conditions have been met, num is likely tru   
+    return True 
 
 
 def generateLargePrime():
-    """""Returns a prime number in the range from 2^1023 to (2^1024)-1"""
+    """""Return a prime number in the range from 2^1023 to (2^1024)-1"""
     while True:
         num = random.randrange(2**(1023), 2**(1024)-1)
         if isPrime(num):
             return num
 
 def encrypt(message,n,totient,e,printKeys):
-    d = modularInverse(e,totient) # the inverse of k mod totient is our private key
+    """Return an encrypted form of the unencrypted message input"""
+    # The inverse of k mod totient is our private key. Store in d
+    d = modularInverse(e,totient) 
+    # Convert our message of alpha/numeric/special to an int of base 10 based on its unicode values
     numMsg = stringToInt(message)
-    encryptedMsg = pow(int(numMsg),e,n) #message^e mod n is our encrypted message
+    #  message^e mod n is our encrypted message. Store in encryptedMsg
+    encryptedMsg = pow(int(numMsg),e,n) 
     if printKeys:
-        f = open("publicKey.txt",'w+')
-        f.write(str(n))
-        f.close()
-        f1 = open("privateKey.txt",'w+')
-        f1.write(str(d))
-        f1.close()
+        # Write new text file titled "publicKey"
+        pubf = open("publicKey.txt",'w+') #
+        pubf.write(str(n)) # Note: the totient and n values, are both referred to as public keys, but because only the n
+                        # value is used to decrypt the message later on, this will be our only public key
+        pubf.close()
+        # write new text file titled "privateKey"
+        privf = open("privateKey.txt",'w+')
+        privf.write(str(d))
+        privf.close()
     return encryptedMsg
 
 def decrypt(encryptedMsg,publickey,privateKey):
+    """Return the decrypted form of the encrypeted message input"""
+    # The decrypted message is equal to (encryptedMsg^privatekey) mod publicKey
     decryptedMsg = pow(int(encryptedMsg),int(privateKey),int(publicKey))
+    # Conver th
     outputString = intToString(decryptedMsg)
     return outputString
 
 if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a list of passwords? ")
+    # Keep asking for input until one the key words indicating encrypt or decrypt has been entered
     while (R1 not in {"Encrypt","encrypt","Decrypt","decrypt"}):
         R1 = raw_input("Please enter one of the key words 'encrypt' or 'decrypt': ")
-    R2Text = raw_input("Enter the name of the text file containing your list of passwords "
-        " (in the format Website/App Name,username,Password;) ")
-    with open(R2Text,'r') as f1:
-        R2 = f1.read()
-        lines = R2.split("\n")
-        lines = filter(None, lines) # remove all empty strings that represent blank lines
-        print lines
+    R2Text = raw_input("Enter the name of the text file containing your list of passwords " +
+        '\n' + "(Your list should be in the format:" +'\n' "website/app name " + '\n' + "username" + '\n'+"password):")
+    with open(R2Text,'r') as listf:
+        R2 = listf.read()
+        lines = R2.split("\n") # lines is a list of strings, each item in the list representing a line in the 
+                               # the text file that was input
+        # Remove all empty strings that represent blank lines                        
+        lines = filter(None, lines)
+    # linenum will represent the line number in the text file containing list of passwords
+    linenum = 0
     p = generateLargePrime()
     q = generateLargePrime()
     n = p*q
     totient = (p-1)*(q-1)
     e = 65537 # Can use 65537 as our default value for k (our public key), unless k is
               # a factor of the totient
-    while ((e%totient)==0): # in the rare case when 65537 is not a unit of the totient, 
-                            #pick two new random numbers and calculate a new totient
+    # In the rare case when 65537 is not a unit of the totient, 
+    # pick two new random numbers and calculate a new totient. 
+    # Keep generating two random numbers until a unit of the the
+    # totient is found. 
+    while ((e%totient)==0): 
         p = generateLargePrime()
         q = generateLargePrime()
         n = p*q
         totient = (p-1)*(q-1)
     printKeys = False
+    # Case when user wants to encrypt list
     if R1 in {"Encrypt","encrypt"}:
-        placer = 0
-        f = open("encryptedList.txt","a")
+        # elist will be the text file containing the encrypted list of passcodes we will write to
+        elist = open("encryptedList.txt","a")
         for i in range (len(lines)):
-            if placer%3 == 0:
-                f.write(str(lines[i]))
-                f.write('\n')
-            elif placer%3 == 1:
-                f.write(str(encrypt(str(lines[i]),n,totient,e,False)))
-                f.write('\n')
+            if linenum%3 == 0:
+                # Don't encrypt when linenum%3 is equal to 0. This is the line that carries the title.
+                # Simply write to the text file elist.
+                elist.write(str(lines[i]))
+                elist.write('\n')
+            elif linenum%3 == 1:
+                # Encrypt when linenum%2 is equal to 1. This is the line that carries the username.
+                elist.write(str(encrypt(str(lines[i]),n,totient,e,False)))
+                elist.write('\n')
             else:
                 if (i == len(lines)-1):
                     printKeys = True 
-                f.write(str(encrypt(str(lines[i]),n,totient,e,printKeys)))
-                f.write('\n')
-            placer = placer + 1
+                # Encrypt when linenum%3 is equal to 2. This is the line that carries the password.
+                elist.write(str(encrypt(str(lines[i]),n,totient,e,printKeys)))
+                elist.write('\n')
+            # increment linenum by 1
+            linenum = linenum + 1
         print ("Please find a file named encryptedList.txt containing your list of encrypted "
             "usernames/passwords, a file named publicKey.txt containing your public key which may "
             "stored anywhere, and a file named privateKey.txt which must be stored safely")
-
+    # Case when user wants to decrypt list
     elif R1 in {"Decrypt","decrypt"}:
+        # Access the value of the public key
         publicText = raw_input("Enter the name of a the text file containing the public key: ")
-        with open(publicText,'r') as f:
-            publicKey = f.read()
+        with open(publicText,'r') as pub:
+            publicKey = pub.read()
+        # Access the value of the private key
         privateText = raw_input("Enter the name of the text file containing private key: ")
-        with open(privateText,'r') as f2:
-            privateKey = f2.read()
-        placer = 0
-        f = open("decryptedList.txt","a")
+        with open(privateText,'r') as pri:
+            privateKey = pri.read()
+        dlist = open("decryptedList.txt","a")
         for i in range(len(lines)):
-            if placer%3 == 0:
-                f.write(str(lines[i]))
-                f.write('\n')
-            elif placer%3 == 1:
-                f.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
-                f.write('\n')
+            if linenum%3 == 0:
+                # Don't decrypt when linenum%3 is equal to 0. This is the line that carries the title
+                # and has not been enrypted. Simply write to the text file dlist.
+                dlist.write(str(lines[i]))
+                dlist.write('\n')
+            elif linenum%3 == 1:
+                # Encrypt when linenum%3 is equal to 1. This is the line that carries the username.
+                dlist.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                dlist.write('\n')
             else:
-                f.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
-                f.write('\n')
-                f.write('\n')
-            placer = placer + 1
+                # Decrypt when linenum%3 is equal to 2. This is the line that carries the password.
+                dlist.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                dlist.write('\n')
+                # Make second new line for clarity to separate the entries in the list
+                dlist.write('\n') 
+                #increment linenum by 1
+            linenum = linenum + 1
         print "Please find a file named decryptedList.txt containing your list of decrypted usernames/passwords"
 
 
