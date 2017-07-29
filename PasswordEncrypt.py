@@ -1,8 +1,9 @@
 import random
 import math
+from Crypto.Hash import SHA256
 
 def stringToBitList(message):
-    """Convert a string with alphabetic, numeric and special characters to a list of 0's and 1's"""
+    """Converts a string with alphabetic, numeric and special characters to a list of 0's and 1's"""
     total = []
     for character in message:
         # Store Unicode code point of the character in c
@@ -19,7 +20,7 @@ def stringToBitList(message):
     return total
 
 def bitListToInt(bitList):
-    """Convert a list of 0's and 1's, to an int of base 10"""
+    """Converts a list of 0's and 1's, to an int of base 10"""
     return int(''.join([('0','1')[b] for b in bitList]),2)
 
 def stringToInt(message):
@@ -29,7 +30,7 @@ def stringToInt(message):
     return bitListToInt(stringToBitList(message))
 
 def binstringToBitList(binstring): 
-    """Convert a string of '0's and '1's to a list of 0's and 1's"""
+    """Converts a string of '0's and '1's to a list of 0's and 1's"""
     bitList = []
     for bit in binstring:
         bitList.append(int(bit))
@@ -40,7 +41,7 @@ def padBits(bits, padding):
     return [0] * (padding-len(bits)) + bits
 
 def bitListToString(paddedBitSeq):
-    """Convert a list of 0's and 1's to a string of alpha/numeric characters"""
+    """Converts a list of 0's and 1's to a string of alpha/numeric characters"""
     charBuilder = ''
     # Iterate through by 8's becaause each padded bit sequence is 8 bits long
     for segment in range(0,len(paddedBitSeq),8): 
@@ -49,7 +50,7 @@ def bitListToString(paddedBitSeq):
     return charBuilder
 
 def bitsToChar(bitSeq):
-    """Convert each 8 bit length padded bit sequences 
+    """Converts each 8 bit length padded bit sequences 
     back to a char based on its unicode value"""
     value = 0
     for bit in bitSeq:
@@ -65,7 +66,7 @@ def intToString(integer):
     return bitListToString(padBits(bitSeq,(len(bitSeq)+(8-(len(bitSeq)%8)))))
 
 def extendedGCD(a, b):
-    """Return gcd, x and y so that a*x+b*y = gcd(x,y)"""
+    """Returns gcd, x and y so that a*x+b*y = gcd(x,y)"""
     # Base case (when a = 0)
     if a == 0:
         return (b,0,1)
@@ -75,7 +76,7 @@ def extendedGCD(a, b):
         return (gcd, y-(b/a)*x, x)
 
 def modularInverse(a,mod):
-    """Return the value whose product with (a % mod) is equal to 1"""
+    """Returns the value whose product with (a % mod) is equal to 1"""
     gcd,x,y = extendedGCD(a,mod)
     return x%mod
 
@@ -114,41 +115,71 @@ def isPrime(num):
     # if none of these conditions have been met, num is likely tru   
     return True 
 
-
 def generateLargePrime():
-    """""Return a prime number in the range from 2^1023 to (2^1024)-1"""
+    """""Returns a prime number in the range from 2^1023 to (2^1024)-1"""
     while True:
         num = random.randrange(2**(1023), 2**(1024)-1)
         if isPrime(num):
             return num
 
+def padOAEP(message):
+    # Set the messge to 768 bits because the modulus we generated in 
+    # the generateLargePrime() function is 1024 bits, so are message
+    # is covered for exactly 768 bits.
+    message = message + (768 - len(message))*'0'
+
+    len_K0 = 128
+    len_K1 = 128
+    # Set r to be a random value between 2^127 and 2^128
+    r = random.randrange(2**127,2**128)
+    # Add K1 zeroes to the back of our message
+    m = int(message,2) << len_K1
+
+    # Use hash function from imported Crypto.hash library to expand r.
+    # We need r to be 896 bits so we will actually hash it 4 times
+    hash1 = SHA256.new()
+    hash1.update(bin(r)[2:])
+    hash1 = int(hash1.hexdigest(),16)
+    hash2 = SHA256.new()
+    hash2.update(bin(r+1)[2:])
+    hash2 = int(hash2.hexdigest(),16)
+    hash3 = SHA256.new()
+    hash3.update(bin(r+2)[2:])
+    hash3 = int(hash3.hexdigest(),16)
+    hash4 = SHA256.new()
+    hash4.update(bin(r+3)[2:])
+    # Shift our last hash to the right by 128 to get to 896
+    hash4 = int(hash4.hexdigest(),16) >> 128
+
 def encrypt(message,n,totient,e,printKeys):
-    """Return an encrypted form of the unencrypted message input"""
+    """Returns an encrypted form of the unencrypted message input"""
     # The inverse of k mod totient is our private key. Store in d
     d = modularInverse(e,totient) 
     # Convert our message of alpha/numeric/special to an int of base 10 based on its unicode values
     numMsg = stringToInt(message)
-    #  message^e mod n is our encrypted message. Store in encryptedMsg
-    encryptedMsg = pow(int(numMsg),e,n) 
+    # message^e mod n is our encrypted message. Store in encryptedMsg
+    encryptedMsg = pow(res,e,n) 
     if printKeys:
         # Write new text file titled "publicKey"
         pubf = open("publicKey.txt",'w+') #
         pubf.write(str(n)) # Note: the totient and n values, are both referred to as public keys, but because only the n
                         # value is used to decrypt the message later on, this will be our only public key
         pubf.close()
-        # write new text file titled "privateKey"
+        # Write new text file titled "privateKey"
         privf = open("privateKey.txt",'w+')
         privf.write(str(d))
         privf.close()
     return encryptedMsg
 
 def decrypt(encryptedMsg,publickey,privateKey):
-    """Return the decrypted form of the encrypeted message input"""
+    """Returns the decrypted form of the encrypeted message input"""
     # The decrypted message is equal to (encryptedMsg^privatekey) mod publicKey
-    decryptedMsg = pow(int(encryptedMsg),int(privateKey),int(publicKey))
+    x = unpad(encryptedMsg)
+    decryptedMsg = pow(int(x),int(privateKey),int(publicKey))
     # Conver th
     outputString = intToString(decryptedMsg)
     return outputString
+
 
 if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a list of passwords? ")
@@ -193,13 +224,13 @@ if __name__ == '__main__':
                 elist.write('\n')
             elif linenum%3 == 1:
                 # Encrypt when linenum%2 is equal to 1. This is the line that carries the username.
-                elist.write(str(encrypt(str(lines[i]),n,totient,e,False)))
+                elist.write(str(encrypt(padOAEP(str(lines[i])),n,totient,e,False)))
                 elist.write('\n')
             else:
                 if (i == len(lines)-1):
                     printKeys = True 
                 # Encrypt when linenum%3 is equal to 2. This is the line that carries the password.
-                elist.write(str(encrypt(str(lines[i]),n,totient,e,printKeys)))
+                elist.write(str(encrypt(padOAEP(str(lines[i])),n,totient,e,printKeys)))
                 elist.write('\n')
             # increment linenum by 1
             linenum = linenum + 1
