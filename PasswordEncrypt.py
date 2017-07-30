@@ -137,19 +137,25 @@ def padOAEP(message):
 
     # Use hash function from imported Crypto.hash library to expand r.
     # We need r to be 896 bits so we will actually hash it 4 times
+    hashlist = []
     hash1 = SHA256.new()
     hash1.update(bin(r)[2:])
     hash1 = int(hash1.hexdigest(),16)
+    hashlist.append(hash1)
     hash2 = SHA256.new()
     hash2.update(bin(r+1)[2:])
     hash2 = int(hash2.hexdigest(),16)
+    hashlist.append(hash2)
     hash3 = SHA256.new()
     hash3.update(bin(r+2)[2:])
     hash3 = int(hash3.hexdigest(),16)
+    hashlist.append(hash3)
     hash4 = SHA256.new()
     hash4.update(bin(r+3)[2:])
     # Shift our last hash to the right by 128 to get to 896
     hash4 = int(hash4.hexdigest(),16) >> 128
+    hashlist.append(hash4)
+
 
 def encrypt(message,n,totient,e,printKeys):
     """Returns an encrypted form of the unencrypted message input"""
