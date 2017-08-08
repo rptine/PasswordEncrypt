@@ -20,7 +20,7 @@ def stringToBitList(message):
     return total
 
 def bitListToInt(bitList):
-    """Converts a list of 0's and 1's, to an int of base 10"""
+    """Converts a list of 0's and 1's, to an int of base 2"""
     return int(''.join([('0','1')[b] for b in bitList]),2)
 
 def stringToInt(message):
@@ -122,7 +122,15 @@ def generateLargePrime():
         if isPrime(num):
             return num
 
+def padHash(hashNum,size):
+    """Pads all inputs until its the size of size bits"""
+    hashLength = len(bin(hashNum))[2:]
+    while(hashLength!=256):
+        hashNum = hashNum + '0'*(size-hashLength)
+    return bin(hashNum)[2:]
+
 def padOAEP(message):
+    message = bin(message)[2:]
     # Set the messge to 768 bits because the modulus we generated in 
     # the generateLargePrime() function is 1024 bits, so are message
     # is covered for exactly 768 bits.
@@ -133,7 +141,7 @@ def padOAEP(message):
     # Set r to be a random value between 2^127 and 2^128
     r = random.randrange(2**127,2**128)
     # Add K1 zeroes to the back of our message
-    m = int(message,2) << len_K1
+    message = int(message,2) << len_K1
 
     # Use hash function from imported Crypto.hash library to expand r.
     # We need r to be 896 bits so we will actually hash it 4 times
@@ -141,21 +149,62 @@ def padOAEP(message):
     hash1 = SHA256.new()
     hash1.update(bin(r)[2:])
     hash1 = int(hash1.hexdigest(),16)
-    hashlist.append(hash1)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash1),256)
     hash2 = SHA256.new()
     hash2.update(bin(r+1)[2:])
     hash2 = int(hash2.hexdigest(),16)
-    hashlist.append(hash2)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash2),256)
     hash3 = SHA256.new()
     hash3.update(bin(r+2)[2:])
     hash3 = int(hash3.hexdigest(),16)
-    hashlist.append(hash3)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash3),256)
     hash4 = SHA256.new()
     hash4.update(bin(r+3)[2:])
     # Shift our last hash to the right by 128 to get to 896
     hash4 = int(hash4.hexdigest(),16) >> 128
+    # Pad to 256 bits before putting in array
+    hash4 = padHash(hash4,256)
+    # Shift to the right by 128 bits
+    hash4 = int(hash4,2) >> 128
+    # And pad to 128 bits
+    hash4 = pad(hash4,128)
+    # Now, append hash4
     hashlist.append(hash4)
+    G = ''
+    # Compile all of the hashes into string variable G
+    for h in hashlist:
+        G += h
+    # XOR message and G
+    output1 = message ^ int(G,2)
+    output1 = padHash(output1,896)
 
+    # Reduce output1 to K0 bits 
+    hash5 = SHA256.new()
+    hash5.update(output1)
+    hash5 = int(hash5.hexdigest(),16)
+    HOfOutput1 = h >> 128 #throw out the last 128 bits to get 128 bit hash instead of 256
+
+    output2 = HForOutput1 ^ r
+    output2 = padHash(output2,128)
+    return (output1 + output2)
+
+def unpadOAEP(encodedMessage):
+    # Split encodedMessage after first 896 bits
+    a = encodedMessage[:896]
+    b = encodedMessage[896:]
+    Hash = SHA256.new()
+    Hash.update(a)
+    HashOfa = int(Hash.hexdigest(),16) >> 128
+    # Get back the random string using XOR
+    r = int(a,2) ^ HashOfa
+
+
+
+
+    
 
 def encrypt(message,n,totient,e,printKeys):
     """Returns an encrypted form of the unencrypted message input"""
@@ -185,7 +234,6 @@ def decrypt(encryptedMsg,publickey,privateKey):
     # Conver th
     outputString = intToString(decryptedMsg)
     return outputString
-
 
 if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a list of passwords? ")
@@ -262,19 +310,14 @@ if __name__ == '__main__':
                 dlist.write('\n')
             elif linenum%3 == 1:
                 # Encrypt when linenum%3 is equal to 1. This is the line that carries the username.
-                dlist.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                dlist.write(str(decrypt(unpadOAEP(str(lines[i])),int(publicKey),int(privateKey))))
                 dlist.write('\n')
             else:
                 # Decrypt when linenum%3 is equal to 2. This is the line that carries the password.
-                dlist.write(str(decrypt(str(lines[i]),int(publicKey),int(privateKey))))
+                dlist.write(str(decrypt(unpadOAEP(str(lines[i])),int(publicKey),int(privateKey))))
                 dlist.write('\n')
                 # Make second new line for clarity to separate the entries in the list
                 dlist.write('\n') 
                 #increment linenum by 1
             linenum = linenum + 1
         print "Please find a file named decryptedList.txt containing your list of decrypted usernames/passwords"
-
-
-
-
-
