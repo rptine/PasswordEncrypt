@@ -191,22 +191,55 @@ def padOAEP(message):
     output2 = padHash(output2,128)
     return (output1 + output2)
 
-def unpadOAEP(encodedMessage):
-    # Split encodedMessage after first 896 bits
-    a = encodedMessage[:896]
-    b = encodedMessage[896:]
+def unpadOAEP(paddedMessage):
+    # Split paddedMessage after first 896 bits
+    a = paddedMessage[:896]
+    b = paddedMessage[896:]
     Hash = SHA256.new()
     Hash.update(a)
     HashOfa = int(Hash.hexdigest(),16) >> 128
     # Get back the random string using XOR
-    r = int(a,2) ^ HashOfa
+    r = int(b,2) ^ HashOfa
+
+    hashlist = []
+    hash1 = SHA256.new()
+    hash1.update(bin(r)[2:])
+    hash1 = int(hash1.hexdigest(),16)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash1),256)
+    hash2 = SHA256.new()
+    hash2.update(bin(r+1)[2:])
+    hash2 = int(hash2.hexdigest(),16)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash2),256)
+    hash3 = SHA256.new()
+    hash3.update(bin(r+2)[2:])
+    hash3 = int(hash3.hexdigest(),16)
+    # Pad to 256 bits before putting in array
+    hashlist.append(padHash(hash3),256)
+    hash4 = SHA256.new()
+    hash4.update(bin(r+3)[2:])
+    # Shift our last hash to the right by 128 to get to 896
+    hash4 = int(hash4.hexdigest(),16) >> 128
+    # Pad to 256 bits before putting in array
+    hash4 = padHash(hash4,256)
+    # Shift to the right by 128 bits
+    hash4 = int(hash4,2) >> 128
+    # And pad to 128 bits
+    hash4 = pad(hash4,128)
+    # Now, append hash4
+    hashlist.append(hash4)
+    G = ''
+    # Compile all of the hashes into string variable G
+    for h in hashlist:
+        G += h
+    # Decoded message is message||K1
+    decodedMessage = int(x,2) ^ int(G_of_r,2)
+    decodedMessage = decodedMessage >> 128
+    return decodedMessage[2:]
 
 
-
-
-    
-
-def encrypt(message,n,totient,e,printKeys):
+def encrypt(message,n,totient,e):
     """Returns an encrypted form of the unencrypted message input"""
     # The inverse of k mod totient is our private key. Store in d
     d = modularInverse(e,totient) 
@@ -214,16 +247,15 @@ def encrypt(message,n,totient,e,printKeys):
     numMsg = stringToInt(message)
     # message^e mod n is our encrypted message. Store in encryptedMsg
     encryptedMsg = pow(res,e,n) 
-    if printKeys:
-        # Write new text file titled "publicKey"
-        pubf = open("publicKey.txt",'w+') #
-        pubf.write(str(n)) # Note: the totient and n values, are both referred to as public keys, but because only the n
+    # Write new text file titled "publicKey"
+    pubf = open("publicKey.txt",'w+') #
+    pubf.write(str(n)) # Note: the totient and n values, are both referred to as public keys, but because only the n
                         # value is used to decrypt the message later on, this will be our only public key
-        pubf.close()
-        # Write new text file titled "privateKey"
-        privf = open("privateKey.txt",'w+')
-        privf.write(str(d))
-        privf.close()
+    pubf.close()
+    # Write new text file titled "privateKey"
+    privf = open("privateKey.txt",'w+')
+    privf.write(str(d))
+    privf.close()
     return encryptedMsg
 
 def decrypt(encryptedMsg,publickey,privateKey):
@@ -231,28 +263,23 @@ def decrypt(encryptedMsg,publickey,privateKey):
     # The decrypted message is equal to (encryptedMsg^privatekey) mod publicKey
     x = unpad(encryptedMsg)
     decryptedMsg = pow(int(x),int(privateKey),int(publicKey))
-    # Conver th
-    outputString = intToString(decryptedMsg)
-    return outputString
+    # Convert decrypted output to a string of alpha/numeric characters and return
+    return intToString(decryptedMsg)
 
 if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a list of passwords? ")
     # Keep asking for input until one the key words indicating encrypt or decrypt has been entered
     while (R1 not in {"Encrypt","encrypt","Decrypt","decrypt"}):
         R1 = raw_input("Please enter one of the key words 'encrypt' or 'decrypt': ")
-    R2Text = raw_input("Enter the name of the text file containing your list of passwords " +
-        '\n' + "(Your list should be in the format:" +'\n' "website/app name " + '\n' + "username" + '\n'+"password):")
+    R2Text = raw_input("Enter the name of the text file containing your message to be encrypted")
     with open(R2Text,'r') as listf:
         R2 = listf.read()
-        lines = R2.split("\n") # lines is a list of strings, each item in the list representing a line in the 
-                               # the text file that was input
-        # Remove all empty strings that represent blank lines                        
-        lines = filter(None, lines)
-    # linenum will represent the line number in the text file containing list of passwords
-    linenum = 0
+    # Generate two large primes
     p = generateLargePrime()
     q = generateLargePrime()
+    # Store product of two large primes in n 
     n = p*q
+    # Calculate totient
     totient = (p-1)*(q-1)
     e = 65537 # Can use 65537 as our default value for k (our public key), unless k is
               # a factor of the totient
@@ -269,28 +296,21 @@ if __name__ == '__main__':
     # Case when user wants to encrypt list
     if R1 in {"Encrypt","encrypt"}:
         # elist will be the text file containing the encrypted list of passcodes we will write to
-        elist = open("encryptedList.txt","a")
-        for i in range (len(lines)):
-            if linenum%3 == 0:
-                # Don't encrypt when linenum%3 is equal to 0. This is the line that carries the title.
-                # Simply write to the text file elist.
-                elist.write(str(lines[i]))
-                elist.write('\n')
-            elif linenum%3 == 1:
-                # Encrypt when linenum%2 is equal to 1. This is the line that carries the username.
-                elist.write(str(encrypt(padOAEP(str(lines[i])),n,totient,e,False)))
-                elist.write('\n')
-            else:
-                if (i == len(lines)-1):
-                    printKeys = True 
-                # Encrypt when linenum%3 is equal to 2. This is the line that carries the password.
-                elist.write(str(encrypt(padOAEP(str(lines[i])),n,totient,e,printKeys)))
-                elist.write('\n')
-            # increment linenum by 1
-            linenum = linenum + 1
-        print ("Please find a file named encryptedList.txt containing your list of encrypted "
-            "usernames/passwords, a file named publicKey.txt containing your public key which may "
-            "stored anywhere, and a file named privateKey.txt which must be stored safely")
+        elist = open("encryptedMessage.txt","a")
+        # Check to see if message is less than 768 bits, which is max size that can be encrypted  
+        # with key size of 1024.
+        if len(stringToBitList(R2)) < 768
+            print "This message is too long to encrypt! Must pick a new message"
+            continue
+        # Use OAE padding to padd message
+        paddedMessage = padOAEP(R2)
+        # Use RSA encryption to encrypt padded message
+        encryptedMessage = encrypt(str(paddedMessage),n,totient,e)
+        # Write padded and then encrypted message to text file
+        elist.write(encryptedMessage)
+        print ("Please find a file named encryptedMessage.txt containing your encrypted message, " + '\n' +
+            "a file named publicKey.txt containing your public key which may be stored anywhere " + '\n' +
+            "and a file named privateKey.txt which must be stored safely")
     # Case when user wants to decrypt list
     elif R1 in {"Decrypt","decrypt"}:
         # Access the value of the public key
@@ -301,23 +321,21 @@ if __name__ == '__main__':
         privateText = raw_input("Enter the name of the text file containing private key: ")
         with open(privateText,'r') as pri:
             privateKey = pri.read()
-        dlist = open("decryptedList.txt","a")
-        for i in range(len(lines)):
-            if linenum%3 == 0:
-                # Don't decrypt when linenum%3 is equal to 0. This is the line that carries the title
-                # and has not been enrypted. Simply write to the text file dlist.
-                dlist.write(str(lines[i]))
-                dlist.write('\n')
-            elif linenum%3 == 1:
-                # Encrypt when linenum%3 is equal to 1. This is the line that carries the username.
-                dlist.write(str(decrypt(unpadOAEP(str(lines[i])),int(publicKey),int(privateKey))))
-                dlist.write('\n')
-            else:
-                # Decrypt when linenum%3 is equal to 2. This is the line that carries the password.
-                dlist.write(str(decrypt(unpadOAEP(str(lines[i])),int(publicKey),int(privateKey))))
-                dlist.write('\n')
-                # Make second new line for clarity to separate the entries in the list
-                dlist.write('\n') 
-                #increment linenum by 1
-            linenum = linenum + 1
-        print "Please find a file named decryptedList.txt containing your list of decrypted usernames/passwords"
+        dlist = open("decryptedMessage.txt","a")
+        # Use OAEP to depad message
+        unpaddedMessage = unpadOAEP(R2)
+        # Use RSA to decrypt message
+        decryptedMessage = decrypt(unpadOAEP(unpaddedMessage,int(publicKey),int(privateKey))
+        # Write depadded and decrypted message to text file
+        dlist.write(decryptedMessage)
+        print "Please find a file named decryptedMessage.txt containing your decrypted mesaage"
+
+
+
+
+
+
+
+
+
+
