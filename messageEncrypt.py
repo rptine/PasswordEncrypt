@@ -269,7 +269,7 @@ if __name__ == '__main__':
     # Keep asking for input until one the key words indicating encrypt or decrypt has been entered
     while (R1 not in {"Encrypt","encrypt","Decrypt","decrypt"}):
         R1 = raw_input("Please enter one of the key words 'encrypt' or 'decrypt': ")
-    R2Text = raw_input("Enter the name of the text file containing your message to be encrypted or decrypted")
+    R2Text = raw_input("Enter the name of the text file containing your message to be encrypted")
     with open(R2Text,'r') as listf:
         R2 = listf.read()
     # Generate two large primes
@@ -297,11 +297,9 @@ if __name__ == '__main__':
         elist = open("encryptedMessage.txt","a")
         # Check to see if message is less than 768 bits, which is max size that can be encrypted  
         # with key size of 1024.
-        while (len(stringToBitList(R2)) < 768):
+        if (len(stringToBitList(R2)) < 768):
             print "This message is too long to encrypt! Must pick a new message"
-            R2Text= raw_input("Enter the name  of a text file containing your valid sized message (must be less than 768 bits)")
-            with open(R2Text,'r') as listf:
-            R2 = listf.read()
+            continue
         # Use OAE padding to padd message
         paddedMessage = padOAEP(R2)
         # Use RSA encryption to encrypt padded message
