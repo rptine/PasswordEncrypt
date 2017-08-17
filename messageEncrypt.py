@@ -125,9 +125,12 @@ def generateLargePrime():
 def padHash(hashNum,size):
     """Pads all inputs until its the size of size bits"""
     hashLength = len(bin(hashNum)[2:])
-    if (hashLength!=256):
-        hashNum = str(hashNum) + '0'*(size-hashLength)
-    return bin(int(hashNum))[2:]
+    if (hashLength!=size):
+        paddedHash = '0'*(size-hashLength)
+        paddedHash = paddedHash + bin(int(hashNum))[2:]
+    else:
+        paddedHash = bin(int(hashNum))[2:]
+    return paddedHash
 
 def padOAEP(message):
     # Convert the input message of type str to an int of base 10
@@ -138,12 +141,12 @@ def padOAEP(message):
     # the generateLargePrime() function is 1024 bits, so our message
     # is covered for exactly 768 bits.
     message = message + (768 - len(message))*'0'
-    len_K0 = 128
-    len_K1 = 128
+    lenK0 = 128
+    lenK1 = 128
     # Set r to be a random value between 2^127 and 2^128
     r = random.randrange(2**127,2**128)
     # Add K1 zeroes to the back of our message
-    message = int(message,2) << len_K1
+    message = int(message,2) << lenK1
 
     # Use hash function from imported Crypto.hash library to expand r.
     # We need r to be 896 bits so we will actually hash it 4 times
@@ -182,6 +185,8 @@ def padOAEP(message):
     # XOR message and G
     output1 = message ^ int(G,2)
     output1 = padHash(output1,896)
+    if type(output1) != str:
+        output1 = bin(output1)[2:]
     # Reduce output1 to K0 bits 
     hash5 = SHA256.new()
     hash5.update(output1)
@@ -190,11 +195,13 @@ def padOAEP(message):
 
     output2 = HOfOutput1 ^ r
     output2 = padHash(output2,128)
+    if type(output2) != str:
+        output2 = bin(output2)[2:]
     return (output1 + output2)
 
 def unpadOAEP(paddedMessage):
     # Convert padded bessage to a binary string
-    paddedMessage = bin(paddedMessage)[2:]
+    paddedMessage = bin(int(paddedMessage))[2:]
     # Split paddedMessage after first 896 bits
     a = paddedMessage[:896]
     b = paddedMessage[896:]
@@ -242,7 +249,7 @@ def unpadOAEP(paddedMessage):
     # Convert decodedMesage to a number of base 10
     decodedMessage = int(bin(decodedMessage)[2:],2)
     # Convert decodedMessage to a string and return
-    return intToString(decodedMessage)
+    return decodedMessage
 
 
 def encrypt(message,n,totient,e):
@@ -299,7 +306,7 @@ if __name__ == '__main__':
     # Case when user wants to encrypt list
     if R1 in {"Encrypt","encrypt"}:
         # elist will be the text file containing the encrypted list of passcodes we will write to
-        elist = open("encryptedMessage.txt","a")
+        elist = open("encryptedMessage.txt",'w+')
         # Check to see if message is less than 768 bits, which is max size that can be encrypted  
         # with key size of 1024.
         while (len(stringToBitList(R2)) > 768):
@@ -326,7 +333,7 @@ if __name__ == '__main__':
         privateText = raw_input("Enter the name of the text file containing private key: ")
         with open(privateText,'r') as pri:
             privateKey = pri.read()
-        dlist = open("decryptedMessage.txt","a")
+        dlist = open("decryptedMessage.txt",'w+')
         # Use RSA to decrypt message
         decryptedMessage = decrypt(R2,int(publicKey),int(privateKey))
         # Use OAEP to depad message
