@@ -19,15 +19,17 @@ def stringToBitList(message):
         total = total + indiv
     return total
 
-def bitListToInt(bitList):
-    """Converts a list of 0's and 1's, to an int of base 2"""
-    return int(''.join([('0','1')[b] for b in bitList]),2)
+def bitListToBinString(bitList):
+    return ''.join([('0','1')[b] for b in bitList])
+
+def binStringToInt(binString):
+    return int(binString,2)
 
 def stringToInt(message):
     """Wrapper function for above two funtions to convert a 
     string to a base 10 integer based on the ASCII values of
      its characters"""
-    return bitListToInt(stringToBitList(message))
+    return binStringToInt(bitListToBinString(stringToBitList(message)))
 
 def binstringToBitList(binstring): 
     """Converts a string of '0's and '1's to a list of 0's and 1's"""
@@ -133,10 +135,6 @@ def padHash(hashNum,size):
     return paddedHash
 
 def padOAEP(message):
-    # Convert the input message of type str to an int of base 10
-    message = stringToInt(message)
-    # Convert message to a binary string
-    message = bin(message)[2:]
     # Set the messge to 768 bits because the modulus we generated in 
     # the generateLargePrime() function is 1024 bits, so our message
     # is covered for exactly 768 bits.
@@ -144,7 +142,7 @@ def padOAEP(message):
     lenK0 = 128
     lenK1 = 128
     # Set r to be a random value between 2^127 and 2^128
-    r = random.randrange(2**127,2**128)
+    r = 198010546117653878157931265461103217903#random.randrange(2**127,2**128)
     # Add K1 zeroes to the back of our message
     message = int(message,2) << lenK1
 
@@ -200,8 +198,6 @@ def padOAEP(message):
     return (output1 + output2)
 
 def unpadOAEP(paddedMessage):
-    # Convert padded bessage to a binary string
-    paddedMessage = bin(int(paddedMessage))[2:]
     # Split paddedMessage after first 896 bits
     a = paddedMessage[:896]
     b = paddedMessage[896:]
@@ -215,17 +211,17 @@ def unpadOAEP(paddedMessage):
     hash1 = SHA256.new()
     hash1.update(bin(r)[2:])
     hash1 = int(hash1.hexdigest(),16)
-    # Pad to 256 bits before putting in array
+    # Pad to 256 bits then append to array
     hashlist.append(padHash(hash1,256))
     hash2 = SHA256.new()
     hash2.update(bin(r+1)[2:])
     hash2 = int(hash2.hexdigest(),16)
-    # Pad to 256 bits before putting in array
+    # Pad to 256 bits then append to array
     hashlist.append(padHash(hash2,256))
     hash3 = SHA256.new()
     hash3.update(bin(r+2)[2:])
     hash3 = int(hash3.hexdigest(),16)
-    # Pad to 256 bits before putting in array
+    # Pad to 256 bits then append to array
     hashlist.append(padHash(hash3,256))
     hash4 = SHA256.new()
     hash4.update(bin(r+3)[2:])
@@ -235,10 +231,14 @@ def unpadOAEP(paddedMessage):
     hash4 = padHash(hash4,256)
     # Shift to the right by 128 bits
     hash4 = int(hash4,2) >> 128
+    hash4 = bin(hash4)[2:]
     # And pad to 128 bits
-    hash4 = padHash(hash4,128)
+    paddedHash4 = ''
+    if len(hash4) != 128:
+        paddedHash4 += '0'*(128 - len(hash4))
+        paddedHash4 += hash4
     # Now, append hash4
-    hashlist.append(hash4)
+    hashlist.append(paddedHash4)
     G = ''
     # Compile all of the hashes into string variable G
     for h in hashlist:
@@ -246,11 +246,13 @@ def unpadOAEP(paddedMessage):
     # Decoded message is message||K1
     decodedMessage = int(a,2) ^ int(G,2)
     decodedMessage = decodedMessage >> 128
+    """
     # Convert decodedMesage to a number of base 10
     decodedMessage = int(bin(decodedMessage)[2:],2)
     # Convert decodedMessage to a string and return
-    return decodedMessage
-
+    return intToString(decodedMessage)
+    """
+    return bin(decodedMessage)[2:]
 
 def encrypt(message,n,totient,e):
     """Returns an encrypted form of the unencrypted message input"""
@@ -267,7 +269,7 @@ def encrypt(message,n,totient,e):
     privf = open("privateKey.txt",'w+')
     privf.write(str(d))
     privf.close()
-    return str(encryptedMsg)
+    return encryptedMsg
 
 def decrypt(encryptedMsg,publickey,privateKey):
     """Returns the decrypted form of the encrypeted message input"""
@@ -275,6 +277,20 @@ def decrypt(encryptedMsg,publickey,privateKey):
     decryptedMsg = pow(int(encryptedMsg),int(privateKey),int(publicKey))
     # Convert decrypted output to a string of alpha/numeric characters and return
     return decryptedMsg
+
+def pad_to_1024(b):
+    bits = ''
+    rest = 1024 - len(b)
+    bits += '0'*rest
+    bits += str(b)
+    return bits
+
+def pad_bits(b):
+    bits = ''
+    if len(b) % 8 != 0:
+        bits += '0'*(8 - (len(b) % 8))
+        bits += str(b)
+    return bits
 
 if __name__ == '__main__':
     R1 = raw_input("Would you like to encrypt or decrypt a message? ")
@@ -285,8 +301,8 @@ if __name__ == '__main__':
     with open(R2Text,'r') as file1:
         R2 = file1.read()
     # Generate two large primes
-    p = generateLargePrime()
-    q = generateLargePrime()
+    p = 140301991951908562119025758853355776296436205087379798204552512035103021450433846371659888644752261560854779816703040364716482722462618565123990373349899018684542339211436948862669090779589575128247132693012144037986838087520129909102279185901163591423305882744912042769306065692969373868446622969359190799929#generateLargePrime()
+    q = 178666246725731269353627521799475789248436371434226412303124810132091804554937748701632532874001864903281688432630745919881383978056246048452754229681613012885339762626253666533054038641999587070994912263052882496585211662497702924270449858715768932439270671552384135791900473685558102588684656345309007059253#generateLargePrime()
     # Store product of two large primes in n 
     n = p*q
     # Calculate totient
@@ -298,11 +314,10 @@ if __name__ == '__main__':
     # Keep generating two random numbers until a unit of the the
     # totient is found. 
     while ((e%totient)==0): 
-        p = generateLargePrime()
-        q = generateLargePrime()
+        p = 141891202729432172212772430371608559408937653295821108866732829529271934684228707696569447703744361076979440897004373467270911542926160722939470097495371611149408404726690860404902496561308188985272297682041665351248099586728009488647228372977086320494534195673076341119091496768891180992245414434569792652816
+        q = 142799663329494549111827709759384184297799151462982976379179345275974782401661287049460835210543269670979430400906482171035317061073784025568202739089103104756697573982777922824334444310980413286637565280093763419725916217309928557916522325148453312489479694205979761431828547717842095260887042091440377092296
         n = p*q
         totient = (p-1)*(q-1)
-    printKeys = False
     # Case when user wants to encrypt list
     if R1 in {"Encrypt","encrypt"}:
         # elist will be the text file containing the encrypted list of passcodes we will write to
@@ -314,15 +329,16 @@ if __name__ == '__main__':
             R2Text = raw_input("Enter the name  of a text file containing your valid sized message (must be less than 768 bits): ")
             with open(R2Text,'r') as listf:
                 R2 = listf.read()
-        # Use OAE padding to padd message
-        paddedMessage = padOAEP(R2)
+        # Convert input to binary string and use OAE padding to pad message
+        paddedMessage = padOAEP(bitListToBinString(stringToBitList((R2))))
         # Use RSA encryption to encrypt padded message
-        encryptedMessage = encrypt(str(paddedMessage),n,totient,e)
+        encryptedMessage = encrypt(paddedMessage,n,totient,e)
         # Write padded and then encrypted message to text file
-        elist.write(encryptedMessage)
-        print ("Please find a file named encryptedMessage.txt containing your encrypted message, " + '\n' +
-            "a file named publicKey.txt containing your public key which may be stored anywhere " + '\n' +
+        elist.write(str(encryptedMessage))
+        print ("Please find a file named encryptedMessage.txt containing your encrypted message, " +
+            "a file named publicKey.txt containing your public key which may be stored anywhere " + 
             "and a file named privateKey.txt which must be stored safely")
+        
     # Case when user wants to decrypt list
     elif R1 in {"Decrypt","decrypt"}:
         # Access the value of the public key
@@ -336,10 +352,11 @@ if __name__ == '__main__':
         dlist = open("decryptedMessage.txt",'w+')
         # Use RSA to decrypt message
         decryptedMessage = decrypt(R2,int(publicKey),int(privateKey))
-        # Use OAEP to depad message
-        unpaddedMessage = unpadOAEP(decryptedMessage)
-        # Write depadded and decrypted message to text file
-        dlist.write(unpaddedMessage)
+        decryptedMessage = bin(decryptedMessage)[2:]
+        # Convert decryptedMessage to a binary string and use OAE padding to depad message
+        unpaddedMessage = unpadOAEP(pad_to_1024(decryptedMessage))
+        # Write depadded and decrypted message as a string to text file
+        dlist.write(intToString(int(unpaddedMessage,2)))
         print ("Please find a file named decryptedMessage.txt containing your decrypted mesaage")
 
 
