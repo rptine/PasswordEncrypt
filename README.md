@@ -19,7 +19,8 @@ saved in the current directory, and we run `python messageEncrypt.py` the comman
 Answer with *"Encrypt"* and the following prompt will appear: <br /> <br />
 *Enter the name of the text file containing your message to be encrypted or decrypted:* <br /> <br />
 Reply with the name of the .txt file we want to encrypt which is "myMessage.txt". <br />  <br />
-The program then performs the encryption.  When encryption is complete the program displays on the command line *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*.  All of the specified files are  found in current the directory:  <br />
+The program then performs the encryption.  When encryption is complete the program displays on the command line <br /> <br />
+*Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*.  All of the specified files are  found in current the directory:  <br />
 ![encryptedMessage.txt](/example/B.png)
 ![publicKey.txt](/example/C.png)
 ![privateKey.txt](/example/D.png)
@@ -32,7 +33,7 @@ If we have the text files containing an encrypted message, and the public and pr
 *Would you like to encrypt or decrypt a message?*  </center> <br /> <br />
 Answer with *"Decrypt"* and the following prompt will appear: <br /> <br />
 *Enter the name of the text file containing your message to be encrypted or decrypted:* </center>  <br /> <br />
-Reply with the name of the .txt file we want to decrypt which is *"encryptedMessge.txt"*. The command line will then ask for the public and private keys, as follows:<br />
+Reply with the name of the .txt file we want to decrypt which is *"encryptedMessge.txt"*. The command line will then ask for the public and private keys: <br /> <br />
 *Enter the name of a the text file containing the public key:* </br> 
 *Enter the name of a the text file containing the private key:*</br> <br />
 After entering both requests, the command line will display: <br /> <br />
