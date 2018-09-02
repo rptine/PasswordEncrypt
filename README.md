@@ -12,15 +12,14 @@ The program prompts the user to select *encrypt* or *decrypt*. If the user selec
 If the user selects *decrypt*, the program will then prompt the user to input the name of a text file containing an encrypted message, the name a text file containing the public key associated with that message, and the name of the text file containing the private key associated with that message. The program will output a text file containing the decrypted message. <br />
 
 ## Example Encryption
-If we have a .txt file *"myMessage"*: <br />
-![myMessage.txt](example/A.png) <br />
-saved in the current directory, and we run `python messageEncrypt.py` the command line will present the prompt:  <br /> <br />
+If we have a .txt file "myMessage.txt "saved in the current directory, and we run `python messageEncrypt.py` the command line will present the prompt:  <br /> <br />
 *Would you like to encrypt or decrypt a message?* <br /><br />
 Answer with *"Encrypt"* and the following prompt will appear: <br /> <br />
 *Enter the name of the text file containing your message to be encrypted or decrypted:* <br /> <br />
 Reply with the name of the .txt file we want to encrypt which is "myMessage.txt". <br />  <br />
 The program then performs the encryption.  When encryption is complete the program displays on the command line <br /> <br />
-*Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*.  All of the specified files are  found in current the directory:  <br />
+*Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/>
+  All of the specified files are  found in current the directory:  <br />
 ![encryptedMessage.txt](/example/B.png)
 ![publicKey.txt](/example/C.png)
 ![privateKey.txt](/example/D.png)
