@@ -21,8 +21,8 @@ The program then performs the encryption.  When encryption is complete the progr
 *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/> <br />
   All of the specified files are  found in current the directory:  <br />
 ![encryptedMessage.txt](/example/B.png)
-![publicKey.txt](/example/C.png)
-![privateKey.txt](/example/D.png)
+![publicKey.txt](/example/C.png =500x250)
+![privateKey.txt](/example/D.png =500x250)
 
 
 
