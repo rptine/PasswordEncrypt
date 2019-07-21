@@ -18,9 +18,9 @@ Reply with the name of the .txt file we want to encrypt which is "myMessage.txt"
 The program then performs the encryption.  When encryption is complete the program displays on the command line <br /> <br />
 *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/> <br />
   All of the specified files are  found in current the directory:  <br />
-<img src=(/example/B.png) height=250px width = 500px>
-<img src=(/example/C.png) height=250px width = 500px>
-<img src=(/example/C.png) height=250px width = 500px>
+<img src="(/example/B.png)" height="250" width = "500">
+<img src="(/example/C.png)" height="250" width = "500">
+<img src="(/example/C.png)" height="250" width = "500">
 
 
 ## Decryption
