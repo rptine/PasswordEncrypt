@@ -6,12 +6,10 @@ The program asks the user for the name of a .txt file to be encrypted/decrypted 
 
 Pull the directory as is.  On the command line, run `pip install -r requirements.txt`.  This command will install the necessary pycrypto library (pycrypto 2.6.1).
 
-## Description of Encryption
+## Encryption
 The program prompts the user to select *encrypt* or *decrypt*. If the user selects *encrypt*, the program will prompt the user to input the name of the text file containing the message to be encrypted. It will then output a text file containing an encrypted message, a text file containing a public key, and a text file containing a private key. <br />
-## Description of Decryption
-If the user selects *decrypt*, the program will then prompt the user to input the name of a text file containing an encrypted message, the name a text file containing the public key associated with that message, and the name of the text file containing the private key associated with that message. The program will output a text file containing the decrypted message. <br />
-
-## Example Encryption
+◊
+### Example Encryption
 If we have a .txt file "myMessage.txt "saved in the current directory, and we run `python messageEncrypt.py` the command line will present the prompt:  <br /> <br />
 *Would you like to encrypt or decrypt a message?* <br /><br />
 Answer with *"Encrypt"* and the following prompt will appear: <br /> <br />
@@ -20,13 +18,15 @@ Reply with the name of the .txt file we want to encrypt which is "myMessage.txt"
 The program then performs the encryption.  When encryption is complete the program displays on the command line <br /> <br />
 *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/> <br />
   All of the specified files are  found in current the directory:  <br />
-![encryptedMessage.txt](/example/B.png)
-![publicKey.txt](/example/C.png =500x250)
-![privateKey.txt](/example/D.png =500x250)
+<img src=(/example/B.png) height=250px width = 500px>
+<img src=(/example/C.png) height=250px width = 500px>
+<img src=(/example/C.png) height=250px width = 500px>
 
 
+## Decryption
+If the user selects *decrypt*, the program will then prompt the user to input the name of a text file containing an encrypted message, the name a text file containing the public key associated with that message, and the name of the text file containing the private key associated with that message. The program will output a text file containing the decrypted message. <br />
 
-## Example Decryption
+### Example Decryption
 (We will continue from our example above and use the files encryptedMessage.txt, publicKey.txt, and privateKey.txt; these could be saved under any names when executed by the user). <br />
 If we have the text files containing an encrypted message, and the public and private keys associated with that message saved in the current directory, and we run: `python messageEncrypt.py` the command line will present the prompt:  <br /> <br />
 *Would you like to encrypt or decrypt a message?*  </center> <br /> <br />
@@ -41,7 +41,6 @@ In our directory we will find decryptedMessage.txt which contains our original m
 ![decryptedMessage.txt](/example/E.png)
 
 
-
 ## Implementation
 
 In the encryption process of the RSA algorithm, I used the Rabin Miller Primality Test to test whether the large primes I was generating using the random library were random. <br />
@@ -51,9 +50,9 @@ Also in the encryption process of the RSA algorithm, I used a recursive GCD algo
 
 ## Built With
 
-* [random](The Python Standard Library: Lib/random.py) - Library used in RSA implementation
-* [math](The Python Standard Library) - Dependency Management
-* [Crypto](https://github.com/dlitz/pycrypto) - Used hash functions from this library to implement padding.
+* [random] (The Python Standard Library: Lib/random.py) - Library used in RSA implementation
+* [math] (The Python Standard Library) - Dependency Management
+* [Crypto]( https://github.com/dlitz/pycrypto) - Used hash functions from this library to implement padding.
 
 
 
