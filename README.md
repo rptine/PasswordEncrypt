@@ -8,7 +8,7 @@ Pull the directory as is.  On the command line, run `pip install -r requirements
 
 ## Encryption
 The program prompts the user to select *encrypt* or *decrypt*. If the user selects *encrypt*, the program will prompt the user to input the name of the text file containing the message to be encrypted. It will then output a text file containing an encrypted message, a text file containing a public key, and a text file containing a private key. <br />
-◊
+
 ### Example Encryption
 If we have a .txt file "myMessage.txt "saved in the current directory, and we run ```python messageEncrypt.py``` the command line will present the prompt:  <br /> <br />
 *Would you like to encrypt or decrypt a message?* <br /><br />
@@ -19,9 +19,9 @@ The program then performs the encryption.  When encryption is complete the progr
 *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/>
 All of the specified files are  found in current the directory: <br />  <br />
 
-<img src="./example/B.png" width="500"/> <br />  <br />
-<img src="./example/C.png" width="500"/> <br />  <br />
-<img src="./example/D.png" width="500"/>
+<img src="./example/B.png" width="700"/> <br />  <br />
+<img src="./example/C.png" width="700"/> <br />  <br />
+<img src="./example/D.png" width="700"/>
 
 
 ## Decryption
@@ -40,7 +40,7 @@ After entering both requests, the command line will display: <br /> <br />
 *Please find a file named decryptedMessage.txt containing your decrypted message* </br> <br />
 In our directory we will find decryptedMessage.txt which contains our original message!
 <br />  <br />
-<img src="./example/E.png" width="500"/>
+<img src="./example/E.png" width="700"/>
 
 
 
