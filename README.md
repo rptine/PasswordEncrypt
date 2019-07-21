@@ -19,9 +19,9 @@ The program then performs the encryption.  When encryption is complete the progr
 *Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/>
 All of the specified files are  found in current the directory: <br />  <br />
 
-<img src="B.png" width="450"/> <br />  <br />
-<img src="C.png" width="450"/> <br />  <br />
-<img src="D.png" width="450"/>
+<img src="./example/B.png" width="500"/> <br />  <br />
+<img src="./example/C.png" width="500"/> <br />  <br />
+<img src="./example/D.png" width="500"/>
 
 
 ## Decryption
@@ -40,7 +40,7 @@ After entering both requests, the command line will display: <br /> <br />
 *Please find a file named decryptedMessage.txt containing your decrypted message* </br> <br />
 In our directory we will find decryptedMessage.txt which contains our original message!
 <br />  <br />
-<img src="E.png" width="450"/>
+<img src="./example/E.png" width="500"/>
 
 
 
