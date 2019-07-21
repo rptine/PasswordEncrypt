@@ -10,17 +10,18 @@ Pull the directory as is.  On the command line, run `pip install -r requirements
 The program prompts the user to select *encrypt* or *decrypt*. If the user selects *encrypt*, the program will prompt the user to input the name of the text file containing the message to be encrypted. It will then output a text file containing an encrypted message, a text file containing a public key, and a text file containing a private key. <br />
 ◊
 ### Example Encryption
-If we have a .txt file "myMessage.txt "saved in the current directory, and we run `python messageEncrypt.py` the command line will present the prompt:  <br /> <br />
+If we have a .txt file "myMessage.txt "saved in the current directory, and we run ```python messageEncrypt.py``` the command line will present the prompt:  <br /> <br />
 *Would you like to encrypt or decrypt a message?* <br /><br />
 Answer with *"Encrypt"* and the following prompt will appear: <br /> <br />
 *Enter the name of the text file containing your message to be encrypted or decrypted:* <br /> <br />
 Reply with the name of the .txt file we want to encrypt which is "myMessage.txt". <br />  <br />
 The program then performs the encryption.  When encryption is complete the program displays on the command line <br /> <br />
-*Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/> <br />
-  All of the specified files are  found in current the directory:  <br />
-<img src="(/example/B.png)" height="250" width = "500">
-<img src="(/example/C.png)" height="250" width = "500">
-<img src="(/example/C.png)" height="250" width = "500">
+*Please find a file named encryptedMessage.txt containing your encrypted message, a file named publicKey.txt containing your public key which may be stored anywhere and a file named privateKey.txt which must be stored safely*. <br/>
+All of the specified files are  found in current the directory: <br />  <br />
+
+<img src="B.png" width="450"/> <br />  <br />
+<img src="C.png" width="450"/> <br />  <br />
+<img src="D.png" width="450"/>
 
 
 ## Decryption
@@ -38,7 +39,9 @@ Reply with the name of the .txt file we want to decrypt which is *"encryptedMess
 After entering both requests, the command line will display: <br /> <br />
 *Please find a file named decryptedMessage.txt containing your decrypted message* </br> <br />
 In our directory we will find decryptedMessage.txt which contains our original message!
-![decryptedMessage.txt](/example/E.png)
+<br />  <br />
+<img src="E.png" width="450"/>
+
 
 
 ## Implementation
@@ -52,7 +55,7 @@ Also in the encryption process of the RSA algorithm, I used a recursive GCD algo
 
 * [random] (The Python Standard Library: Lib/random.py) - Library used in RSA implementation
 * [math] (The Python Standard Library) - Dependency Management
-* [Crypto]( https://github.com/dlitz/pycrypto) - Used hash functions from this library to implement padding.
+* [Crypto] (https://github.com/dlitz/pycrypto) - Used hash functions from this library to implement padding.
 
 
 
